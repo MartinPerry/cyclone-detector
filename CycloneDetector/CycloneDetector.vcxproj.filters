@@ -132,9 +132,6 @@
     <ClCompile Include="PressureExtrema.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PressureFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -152,6 +149,9 @@
     </ClCompile>
     <ClCompile Include="MapProjections\Reprojection.cpp">
       <Filter>Source Files\MapProjections</Filter>
+    </ClCompile>
+    <ClCompile Include="CycloneDetector.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +230,6 @@
     <ClInclude Include="PressureExtrema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PressureFinder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MapProjections\GeoCoordinate.h">
       <Filter>Header Files\MapProjections</Filter>
     </ClInclude>
@@ -262,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="MapProjections\Projections\LambertConic.h">
       <Filter>Header Files\MapProjections\Projections</Filter>
+    </ClInclude>
+    <ClInclude Include="CycloneDetector.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

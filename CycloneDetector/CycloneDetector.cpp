@@ -1,4 +1,4 @@
-#include "./PressureFinder.h"
+#include "./CycloneDetector.h"
 
 #include <stack>
 #include <array>
@@ -27,8 +27,8 @@
 
 #include "PressureExtrema.h"
 
-std::string PressureFinder::debugName = "";
-std::string PressureFinder::debugDirName = "";
+std::string CycloneDetector::debugName = "";
+std::string CycloneDetector::debugDirName = "";
 
 
 /// <summary>
@@ -39,7 +39,7 @@ std::string PressureFinder::debugDirName = "";
 /// <param name="fileName"></param>
 /// <param name="w"></param>
 /// <param name="h"></param>
-PressureFinder::PressureFinder(const char * fileName, int w, int h) :
+CycloneDetector::CycloneDetector(const char * fileName, int w, int h) :
 	//rawData(Image2d<float>::CreateFromRawFile(1097, 657, ColorSpace::PixelFormat::GRAY, fileName)),
 	rawData(Image2d<float>::CreateFromRawFile(w, h, ColorSpace::PixelFormat::GRAY, fileName)),
 	latCorrectionFactor(15),
@@ -59,7 +59,7 @@ PressureFinder::PressureFinder(const char * fileName, int w, int h) :
 /// <param name="data"></param>
 /// <param name="w"></param>
 /// <param name="h"></param>
-PressureFinder::PressureFinder(const std::vector<float> & data, int w, int h) :
+CycloneDetector::CycloneDetector(const std::vector<float> & data, int w, int h) :
 	rawData(Image2d<float>(w, h, data, ColorSpace::PixelFormat::GRAY)),	
 	latCorrectionFactor(15),
 	maskRadius(20),
@@ -75,7 +75,7 @@ PressureFinder::PressureFinder(const std::vector<float> & data, int w, int h) :
 /// ctor
 /// </summary>
 /// <param name="input"></param>
-PressureFinder::PressureFinder(Image2d<float>&& input) :
+CycloneDetector::CycloneDetector(Image2d<float>&& input) :
 	rawData(std::move(input)),
 	latCorrectionFactor(15),
 	maskRadius(20),
@@ -91,16 +91,16 @@ PressureFinder::PressureFinder(Image2d<float>&& input) :
 /// <summary>
 /// dtor
 /// </summary>
-PressureFinder::~PressureFinder()
+CycloneDetector::~CycloneDetector()
 {
 }
 
-double PressureFinder::GetContoursStep() const
+double CycloneDetector::GetContoursStep() const
 {
 	return this->contourStep;
 }
 
-int PressureFinder::GetSystemsCount() const
+int CycloneDetector::GetSystemsCount() const
 {
 	int count = 0;
 	for (auto& c : this->extremas)
@@ -119,17 +119,17 @@ int PressureFinder::GetSystemsCount() const
 /// Get all detected extremas
 /// </summary>
 /// <returns></returns>
-const std::vector<PressureExtrema>& PressureFinder::GetExtremas() const
+const std::vector<PressureExtrema>& CycloneDetector::GetExtremas() const
 {
 	return this->extremas;
 }
 
-const std::vector<Contour>& PressureFinder::GetContours() const
+const std::vector<Contour>& CycloneDetector::GetContours() const
 {
 	return this->contours;
 }
 
-const Image2d<float>& PressureFinder::GetRawData() const
+const Image2d<float>& CycloneDetector::GetRawData() const
 {
 	return this->rawData;
 }
@@ -138,7 +138,7 @@ const Image2d<float>& PressureFinder::GetRawData() const
 /// Get minimal value from data
 /// </summary>
 /// <returns></returns>
-float PressureFinder::GetDataMin() const
+float CycloneDetector::GetDataMin() const
 {
 	return this->minValue;
 }
@@ -147,7 +147,7 @@ float PressureFinder::GetDataMin() const
 /// Get maximal value from data
 /// </summary>
 /// <returns></returns>
-float PressureFinder::GetDataMax() const
+float CycloneDetector::GetDataMax() const
 {
 	return this->maxValue;
 }
@@ -163,7 +163,7 @@ float PressureFinder::GetDataMax() const
 /// To disable this feature, set factor to 0.0
 /// </summary>
 /// <param name="f"></param>
-void PressureFinder::SetAreaLatitudeCorrectionFactor(double f)
+void CycloneDetector::SetAreaLatitudeCorrectionFactor(double f)
 {
 	this->latCorrectionFactor = f;
 }
@@ -177,7 +177,7 @@ void PressureFinder::SetAreaLatitudeCorrectionFactor(double f)
 /// To disable this feature, set value to 0
 /// </summary>
 /// <param name="v"></param>
-void PressureFinder::SetMinCentersDistanceThresholdPixel(int v)
+void CycloneDetector::SetMinCentersDistanceThresholdPixel(int v)
 {
 	this->minCentersDistanceThresholdPixel = v;
 }
@@ -190,7 +190,7 @@ void PressureFinder::SetMinCentersDistanceThresholdPixel(int v)
 /// Default: 10*10px
 /// </summary>
 /// <param name="v"></param>
-void PressureFinder::SetSmallAreaThreshold(AreaThreshold v)
+void CycloneDetector::SetSmallAreaThreshold(AreaThreshold v)
 {
 	this->smallAreaThreshold = v;
 }
@@ -203,7 +203,7 @@ void PressureFinder::SetSmallAreaThreshold(AreaThreshold v)
 /// Default: 0.6
 /// </summary>
 /// <param name="v"></param>
-void PressureFinder::SetExtremaCorrectRatio(double v)
+void CycloneDetector::SetExtremaCorrectRatio(double v)
 {
 	this->extremaCorrectRatio = v;
 }
@@ -215,7 +215,7 @@ void PressureFinder::SetExtremaCorrectRatio(double v)
 /// If set to 0 = mask radius is auto calculated
 /// </summary>
 /// <param name="r"></param>
-void PressureFinder::SetExtremaMaskRadius(int r)
+void CycloneDetector::SetExtremaMaskRadius(int r)
 {
 	this->maskRadius = r;	
 }
@@ -224,7 +224,7 @@ void PressureFinder::SetExtremaMaskRadius(int r)
 /// Set step between contours in Pa
 /// </summary>
 /// <param name="step"></param>
-void PressureFinder::SetContoursStep(double step)
+void CycloneDetector::SetContoursStep(double step)
 {
 	this->contourStep = step;
 }
@@ -232,7 +232,7 @@ void PressureFinder::SetContoursStep(double step)
 /// <summary>
 /// Run the algorithm
 /// </summary>
-void PressureFinder::Run()
+void CycloneDetector::Run()
 {
 	this->contours.clear();
 	this->extremas.clear();
@@ -256,7 +256,7 @@ void PressureFinder::Run()
 /// Find contours in image
 /// using Marching Squares
 /// </summary>
-void PressureFinder::FindContours()
+void CycloneDetector::FindContours()
 {
 	//build contours
 	for (double t = minValue; t <= maxValue; t += this->contourStep)
@@ -298,7 +298,7 @@ void PressureFinder::FindContours()
 /// - remove small extrema contours and "move" the extrema
 /// to its parent
 /// </summary>
-void PressureFinder::BuildContoursHierarchy()
+void CycloneDetector::BuildContoursHierarchy()
 {
 	//build extrema contours
 	for (size_t i = 0; i < contours.size(); i++)
@@ -495,7 +495,7 @@ void PressureFinder::BuildContoursHierarchy()
 /// <param name="c"></param>
 /// <param name="proj"></param>
 /// <returns></returns>
-double PressureFinder::CalcArea(const Contour& c, Projections::IProjectionInfo* proj)
+double CycloneDetector::CalcArea(const Contour& c, Projections::IProjectionInfo* proj)
 {	
 	if (proj == nullptr)
 	{
@@ -519,7 +519,7 @@ double PressureFinder::CalcArea(const Contour& c, Projections::IProjectionInfo* 
 }
 
 template <typename Proj>
-double PressureFinder::CalcAreaProj(const Contour& c, Proj* proj)
+double CycloneDetector::CalcAreaProj(const Contour& c, Proj* proj)
 {
 	const auto& aabb = c.c.GetBoundingBox();
 
@@ -546,7 +546,7 @@ double PressureFinder::CalcAreaProj(const Contour& c, Proj* proj)
 /// </summary>
 /// <param name="y"></param>
 /// <returns></returns>
-double PressureFinder::GetLatitudeAreaCorrection(double y)
+double CycloneDetector::GetLatitudeAreaCorrection(double y)
 {		
 	if (latCorrectionFactor == 0)
 	{
@@ -580,7 +580,7 @@ double PressureFinder::GetLatitudeAreaCorrection(double y)
 /// </summary>
 /// <param name="maskX"></param>
 /// <param name="maskY"></param>
-void PressureFinder::InitExtremaMask(ConvolutionFilter2d & maskX,
+void CycloneDetector::InitExtremaMask(ConvolutionFilter2d & maskX,
 	ConvolutionFilter2d & maskY)
 {
 	maskX = ConvolutionFilter2d::CreateSquare(maskRadius, 0);
@@ -623,7 +623,7 @@ void PressureFinder::InitExtremaMask(ConvolutionFilter2d & maskX,
 /// From derivatives, calculate signum values that are returned
 /// </summary>
 /// <returns></returns>
-PressureFinder::Derivatives PressureFinder::CreateDerivatives()
+CycloneDetector::Derivatives CycloneDetector::CreateDerivatives()
 {
 	auto fDx = ConvolutionFilterSeparable::CreateSobelX();
 	//auto fDx = ConvolutionFilter2d::CreateSobelX();
@@ -657,11 +657,11 @@ PressureFinder::Derivatives PressureFinder::CreateDerivatives()
 /// Find extremas centers for Low and High pressure
 /// Extremas are located inside contours that were marked as extrem candidate
 /// </summary>
-void PressureFinder::FindExtrema()
+void CycloneDetector::FindExtrema()
 {	
 #ifndef DISABLE_DEBUG_OUTPUT
 	Image2d<uint8_t> test2;
-	if (PressureFinder::debugDirName != "")
+	if (CycloneDetector::debugDirName != "")
 	{
 		test2 = ColorSpace::ConvertGrayToRgb(rawData.CreateAsMapped<uint8_t>(0, 255));
 	}
@@ -810,7 +810,7 @@ void PressureFinder::FindExtrema()
 				pxExtrema->AddPixel(xi, yi);
 
 #ifndef DISABLE_DEBUG_OUTPUT
-				if (PressureFinder::debugDirName != "")
+				if (CycloneDetector::debugDirName != "")
 				{
 
 					if (type == PressureExtrema::PressureType::HIGH)
@@ -897,7 +897,7 @@ void PressureFinder::FindExtrema()
 
 #ifndef DISABLE_DEBUG_OUTPUT
 
-	if (PressureFinder::debugDirName != "")
+	if (CycloneDetector::debugDirName != "")
 	{
 		uint8_t col[3] = { 255, 255, 255 };
 
@@ -964,9 +964,9 @@ void PressureFinder::FindExtrema()
 
 }
 
-void PressureFinder::RenderContours(const std::vector<Contour>& c) const
+void CycloneDetector::RenderContours(const std::vector<Contour>& c) const
 {
-	if (PressureFinder::debugDirName == "")
+	if (CycloneDetector::debugDirName == "")
 	{
 		return;
 	}
@@ -1015,16 +1015,16 @@ void PressureFinder::RenderContours(const std::vector<Contour>& c) const
 /// <summary>
 /// Debug output if OpenCV is present during project build
 /// </summary>
-void PressureFinder::RenderContours()
+void CycloneDetector::RenderContours()
 {
-	if (PressureFinder::debugDirName == "")
+	if (CycloneDetector::debugDirName == "")
 	{
 		return;
 	}
 
 	Image2d<uint8_t> pres = rawData.CreateAsMapped<uint8_t>(0, 255);
 
-	std::string output = PressureFinder::debugDirName;
+	std::string output = CycloneDetector::debugDirName;
 	output += debugName;
 	output += "_input_data.png";
 	pres.Save(output.c_str());
@@ -1141,23 +1141,23 @@ void PressureFinder::RenderContours()
 /// Get saver class instance
 /// </summary>
 /// <returns></returns>
-PressureFinderSaver PressureFinder::GetSaver()
+CycloneDetectorSaver CycloneDetector::GetSaver()
 {
-	return PressureFinderSaver(this);
+	return CycloneDetectorSaver(this);
 }
 
 //===============================================================================
 
-PressureFinderSaver::PressureFinderSaver(const PressureFinder * pf) : 
+CycloneDetectorSaver::CycloneDetectorSaver(const CycloneDetector * pf) : 
 	pf(pf)
 {
 }
 
-PressureFinderSaver::~PressureFinderSaver()
+CycloneDetectorSaver::~CycloneDetectorSaver()
 {
 }
 
-void PressureFinderSaver::Save(const char * modelName, struct tm t,
+void CycloneDetectorSaver::Save(const char * modelName, struct tm t,
 	const char * dbFileName,
 	std::function<void(int, int, Latitude &, Longitude &)> positionToGps)
 {	
@@ -1168,6 +1168,6 @@ void PressureFinderSaver::Save(const char * modelName, struct tm t,
 //=================================================================
 //template specialization declaration
 
-template double PressureFinder::CalcAreaProj(const Contour& c, Projections::Equirectangular* proj);
-template double PressureFinder::CalcAreaProj(const Contour& c, Projections::Mercator* proj);
-template double PressureFinder::CalcAreaProj(const Contour& c, Projections::LambertConic* proj);
+template double CycloneDetector::CalcAreaProj(const Contour& c, Projections::Equirectangular* proj);
+template double CycloneDetector::CalcAreaProj(const Contour& c, Projections::Mercator* proj);
+template double CycloneDetector::CalcAreaProj(const Contour& c, Projections::LambertConic* proj);

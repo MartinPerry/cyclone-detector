@@ -3,7 +3,7 @@
 //===================================================================================
 
 
-#include "./PressureFinder.h"
+#include "./CycloneDetector.h"
 
 #include "./Utils/CmdParser.h"
 #include "./Utils/Logger.h"
@@ -99,6 +99,14 @@ int main(int argc, char ** argv)
 		MyUtils::Logger::GetInstance()->EnableInfoLogging(MyUtils::Logger::LOG_STDOUT);
 	}
 
+	// ======================================================================
+	// NOTE =================================================================
+	// ======================================================================
+	 
+	//If you want to load data from different source (GRIB, NetCDF)
+	//change this
+	//Image2d<float> rawDataFloat = GetDataFromGrib(fileName);
+	//where GetDataFromGrib is your method to load data
 
 	Image2d<uint8_t> rawDataUint(fileName.c_str());
 	if (rawDataUint.GetPixelsCount() == 0)
@@ -106,13 +114,14 @@ int main(int argc, char ** argv)
 		MY_LOG_ERROR("Input image %s is empty", fileName.c_str());
 		return 0;
 	}
-
-	//If you want to load data from different source (GRIB, NetCDF)
-	//change this
+	
 	Image2d<float> rawDataFloat = rawDataUint.CreateAs<float>();
+	// ======================================================================
+	// ======================================================================
+	// ======================================================================
 
 
-	PressureFinder pf(std::move(rawDataFloat));
+	CycloneDetector pf(std::move(rawDataFloat));
 
 #ifndef DISABLE_DEBUG_OUTPUT	
 	pf.debugName = debugOutputName;

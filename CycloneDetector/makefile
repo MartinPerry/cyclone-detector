@@ -10,7 +10,7 @@ LINKER_OPTS = -Wall -O2
 
 CFLAGS = -g -mavx -std=c++17 $(INCLUDE_DIRS)
 
-BIN = pressure_finder
+BIN = cyclone_detector
 
 #=========================================================================================
 COMPRESSION_FILES = $(wildcard ./Compression/*.cpp)

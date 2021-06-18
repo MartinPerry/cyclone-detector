@@ -1,4 +1,4 @@
-# Pressure Finder
+# Cyclone detector
 
 Run program as \<program name\> -\<paramy> -\<param\> ...
 
@@ -71,20 +71,65 @@ If program is compiled without `DISABLE_DEBUG_OUTPUT` (default state) we can out
 
 ## Compilation
 
+There are two ways how to compile the source codes:
+
+# Using makefile
 We use a simple makefile script. 
 If you add `DISABLE_DEBUG_OUTPUT`, program will be compiled without the availability to generate intermediate results. 
+This option will slightly improve performance, since some checks are ommited.
+
+# Using Visual Studio 2019 solution
+We have also provided Visual Studio Solution files with x64 Debug and Release build.
+In this case in `VC++ Directories` add or remove include and library directory for OpenCV library. By default, these path are set to
+`D:\opencv\build\include` and `D:\opencv\build\x64\vc15\lib` respectively. If you do not want OpenCV support, simple remove the variables.
+
+If you add `DISABLE_DEBUG_OUTPUT` under `C/C++ -> Preprocessor -> Preprocessor Definition`, program will be compiled without the availability to generate intermediate results. 
 This option will slightly improve performance, since some checks are ommited.
 
 
 ## Description
 
-The program does not require to add any any 3rd party dependencies. It is written in C++17. 
+The program does not require to add any any 3rd party dependencies 
+(however, you have the opportunity to enable OpenCV for some debug outputs). 
+It is written in C++17. 
 All source files required for the compialtion are included in the repository. 
-The main algorithm is located in files `PressureExtrema` and `PressureFinder`.
+The main algorithm is located in files `PressureExtrema` and `CycloneDetector`.
 
-This demo uses only single-channel grayscale images for the input. However, the image is converted to float array. 
+## Input files
+This demo uses only single-channel grayscale images for the input. 
+
+# Edit input files
+However, as you can see in the code, the image is converted to float array. 
 If you edit the source code, you may load the input file for example directly from GRIB or NetCDF file and use a float array.
 In this case, assign your data to an image `Image2d<float> rawDataFloat` in `main.cpp`.
+In the code of `main.cpp`, this can be seen around line 102
+
+```C++
+	// ======================================================================
+	// NOTE =================================================================
+	// ======================================================================
+	 
+	//If you want to load data from different source (GRIB, NetCDF)
+	//change this to eg:	
+	//Image2d<float> rawDataFloat = GetDataFromGrib(fileName);
+	//where GetDataFromGrib is your method to load data
+
+	Image2d<uint8_t> rawDataUint(fileName.c_str());
+	if (rawDataUint.GetPixelsCount() == 0)
+	{
+		MY_LOG_ERROR("Input image %s is empty", fileName.c_str());
+		return 0;
+	}
+	
+	Image2d<float> rawDataFloat = rawDataUint.CreateAs<float>();
+	// ======================================================================
+	// ======================================================================
+	// ======================================================================
+```
+We have choosed this because we did not want to add any 3rd party dependencies. Usually GRIB or NetCDF libraries
+are large projects and precompiled libraries may not be compatible with all configurations.
+This way, the demo program is independent on external libraries and can be used as it is.
+
 
 
 https://guides.github.com/features/mastering-markdown/

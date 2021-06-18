@@ -22,9 +22,9 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{7A639B11-1BF9-498C-AD30-7F9BD03F27E7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>PressureFinder</RootNamespace>
+    <RootNamespace>CycloneDetector</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>PressureFinder</ProjectName>
+    <ProjectName>CycloneDetector</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -73,8 +73,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\include\;C:\Program Files %28x86%29\PostgreSQL\9.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)../Libs_x86/;C:\Program Files %28x86%29\PostgreSQL\9.5\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)d</TargetName>
@@ -203,7 +203,7 @@
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PressureExtrema.cpp" />
-    <ClCompile Include="PressureFinder.cpp" />
+    <ClCompile Include="CycloneDetector.cpp" />
     <ClCompile Include="RasterData\ColorSpace.cpp" />
     <ClCompile Include="RasterData\Image2d.cpp">
       <FileType>Document</FileType>
@@ -240,7 +240,7 @@
     <ClInclude Include="Math\MathUtils.h" />
     <ClInclude Include="Math\Vector2.h" />
     <ClInclude Include="PressureExtrema.h" />
-    <ClInclude Include="PressureFinder.h" />
+    <ClInclude Include="CycloneDetector.h" />
     <ClInclude Include="RasterData\ColorSpace.h" />
     <ClInclude Include="RasterData\ImageFilters.h" />
     <ClInclude Include="RasterData\Image2d.h" />

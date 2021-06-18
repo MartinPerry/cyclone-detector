@@ -1,8 +1,8 @@
-#ifndef PRESSURE_FINDER_H
-#define PRESSURE_FINDER_H
+#ifndef CYCLONE_DETECTOR_H
+#define CYCLONE_DETECTOR_H
 
 
-class PressureFinderSaver;
+class CycloneDetectorSaver;
 
 #include <functional>
 #include <vector>
@@ -17,7 +17,7 @@ class PressureFinderSaver;
 #include "./PressureExtrema.h"
 
 
-class PressureFinder 
+class CycloneDetector
 {
 public:
 	
@@ -25,11 +25,11 @@ public:
 	static std::string debugDirName;
 
 
-	PressureFinder(const char * fileName, int w, int h);
-	PressureFinder(const std::vector<float> & data, int w, int h);
-	PressureFinder(Image2d<float>&& input);
+	CycloneDetector(const char * fileName, int w, int h);
+	CycloneDetector(const std::vector<float> & data, int w, int h);
+	CycloneDetector(Image2d<float>&& input);
 
-	~PressureFinder();
+	~CycloneDetector();
 
 	double GetContoursStep() const;
 	int GetSystemsCount() const;
@@ -49,7 +49,7 @@ public:
 	void SetContoursStep(double step);
 	void Run();
 
-	PressureFinderSaver GetSaver();
+	CycloneDetectorSaver GetSaver();
 
 	friend class PressureFinderSaver;
 	
@@ -98,11 +98,11 @@ protected:
 
 
 
-class PressureFinderSaver
+class CycloneDetectorSaver
 {
 public:
-	PressureFinderSaver(const PressureFinder * pf);
-	~PressureFinderSaver();
+	CycloneDetectorSaver(const CycloneDetector* pf);
+	~CycloneDetectorSaver();
 
 
 	void Save(const char * modelName, struct tm t,
@@ -111,7 +111,7 @@ public:
 
 protected:
 
-	const PressureFinder * pf;
+	const CycloneDetector* pf;
 
 };
 
