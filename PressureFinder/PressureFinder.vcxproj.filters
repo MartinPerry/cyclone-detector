@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\ADT">
+      <UniqueIdentifier>{e1f141b5-5ef2-43e8-8ee7-9ea2e819b1e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{f1386027-fd30-44f8-b5da-e4a79f395339}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{8348f21b-a817-4044-81fe-0209e4583687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{1eb237bd-cf78-49a3-b58d-1dff7e7d0fc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{2b73bc7f-7d92-49b0-9155-3f5d4accc333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SIMD">
+      <UniqueIdentifier>{f7b492f8-5346-46db-9f0e-cbe246f04db1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Math">
+      <UniqueIdentifier>{fc4b1e67-a89f-4fe5-8661-29b93fd4336f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{a98ea467-4ffb-4f7f-aef2-780f76873182}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Compression">
+      <UniqueIdentifier>{546a519b-68d2-4acd-bd0e-a5910ac962ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Compression">
+      <UniqueIdentifier>{7bcdc445-af40-43a1-8a26-89f9b0e0e536}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Compression\3rdParty">
+      <UniqueIdentifier>{bf6cfb69-dfee-438f-998f-819b6be2d068}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\2d">
+      <UniqueIdentifier>{0028ae69-91c8-4f01-84ec-27b588b864cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\2d">
+      <UniqueIdentifier>{d2c7d7f0-5c5d-4d66-8b76-9cf445ee6564}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RasterData">
+      <UniqueIdentifier>{d494ac5d-c2b0-448a-baec-4e703f925dcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RasterData">
+      <UniqueIdentifier>{17364d81-83db-423e-a91f-301e54854ad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Compression\3rdParty">
+      <UniqueIdentifier>{69680330-bc6c-468f-bbb7-347e2fa09bf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MapProjections">
+      <UniqueIdentifier>{d44ebb03-c65f-4b36-80cf-5d9edd5bfed9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MapProjections">
+      <UniqueIdentifier>{0814615c-ff79-4b6d-a460-2871c74ff1ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MapProjections\Projections">
+      <UniqueIdentifier>{2770cf76-283c-48b1-82a9-0c63cb15051a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MapProjections\Projections">
+      <UniqueIdentifier>{69cc0eee-e4c4-4f4c-9dfb-b8f2f9779cd8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Math\Vector2.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Logger.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\MathUtils.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\2d\Polygon.cpp">
+      <Filter>Source Files\Graphics\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\2d\PolyLine.cpp">
+      <Filter>Source Files\Graphics\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\2d\SimplificationDouglasPeucker.cpp">
+      <Filter>Source Files\Graphics\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\Image2d.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\ColorSpace.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\ImageFilters.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\ImageGausFilter.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Compression\PNGLoader.cpp">
+      <Filter>Source Files\Compression</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\FileWrapper.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\ImageResize.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\ImageUtils.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\CmdParser.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\ImageLoader.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterData\MarchingSquares.cpp">
+      <Filter>Source Files\RasterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Compression\3rdParty\lodepng.cpp">
+      <Filter>Source Files\Compression\3rdParty</Filter>
+    </ClCompile>
+    <ClCompile Include="PressureExtrema.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PressureFinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MapProjections\MapProjectionStructures.cpp">
+      <Filter>Source Files\MapProjections</Filter>
+    </ClCompile>
+    <ClCompile Include="MapProjections\MapProjectionsUtils.cpp">
+      <Filter>Source Files\MapProjections</Filter>
+    </ClCompile>
+    <ClCompile Include="MapProjections\ProjectionInfo.cpp">
+      <Filter>Source Files\MapProjections</Filter>
+    </ClCompile>
+    <ClCompile Include="MapProjections\ProjectionRenderer.cpp">
+      <Filter>Source Files\MapProjections</Filter>
+    </ClCompile>
+    <ClCompile Include="MapProjections\Reprojection.cpp">
+      <Filter>Source Files\MapProjections</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SIMD\avx_math_float.h">
+      <Filter>Header Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector2.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Logger.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\MathUtils.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="SIMD\avx_utils.h">
+      <Filter>Header Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="Compression\3rdParty\lodepng.h">
+      <Filter>Header Files\Compression\3rdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\2d\Polygon.h">
+      <Filter>Header Files\Graphics\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\2d\PolyLine.h">
+      <Filter>Header Files\Graphics\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\2d\SimplificationDouglasPeucker.h">
+      <Filter>Header Files\Graphics\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\2d\BoundingBox2d.h">
+      <Filter>Header Files\Graphics\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\Image2d.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\ColorSpace.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\ImageFilters.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\ImageGausFilter.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\ImageUtils.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Compression\PNGLoader.h">
+      <Filter>Header Files\Compression</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\FileWrapper.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\ImageResize.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\CmdParser.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\IDataLoader.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\ImageLoader.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterData\MarchingSquares.h">
+      <Filter>Header Files\RasterData</Filter>
+    </ClInclude>
+    <ClInclude Include="ADT\BVH.h">
+      <Filter>Header Files\ADT</Filter>
+    </ClInclude>
+    <ClInclude Include="PressureExtrema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PressureFinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\GeoCoordinate.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\IProjectionInfo.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\MapProjectionStructures.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\MapProjectionUtils.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\ProjectionInfo.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\ProjectionRenderer.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\Reprojection.h">
+      <Filter>Header Files\MapProjections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\Projections\Equirectangular.h">
+      <Filter>Header Files\MapProjections\Projections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\Projections\Mercator.h">
+      <Filter>Header Files\MapProjections\Projections</Filter>
+    </ClInclude>
+    <ClInclude Include="MapProjections\Projections\LambertConic.h">
+      <Filter>Header Files\MapProjections\Projections</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="makefile">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
