@@ -6,7 +6,7 @@ Run program as \<program name\> -\<paramy> -\<param\> ...
 For the test program the input file is a single-channel grayscale image in range 0 - 255. 
 The real pressure values are therefore scaled to be in this range.*
 
-## Main input parameters:
+# Main input parameters:
 
 - **file** 
 	- default: "" 
@@ -69,16 +69,16 @@ If program is compiled without `DISABLE_DEBUG_OUTPUT` (default state) we can out
 	- Intermediate file name prefix
 
 
-## Compilation
+# Compilation
 
 There are two ways how to compile the source codes:
 
-# Using makefile
+## Using makefile
 We use a simple makefile script. 
 If you add `DISABLE_DEBUG_OUTPUT`, program will be compiled without the availability to generate intermediate results. 
 This option will slightly improve performance, since some checks are ommited.
 
-# Using Visual Studio 2019 solution
+## Using Visual Studio 2019 solution
 We have also provided Visual Studio Solution files with x64 Debug and Release build.
 In this case in `VC++ Directories` add or remove include and library directory for OpenCV library. By default, these path are set to
 `D:\opencv\build\include` and `D:\opencv\build\x64\vc15\lib` respectively. If you do not want OpenCV support, simple remove the variables.
@@ -87,7 +87,7 @@ If you add `DISABLE_DEBUG_OUTPUT` under `C/C++ -> Preprocessor -> Preprocessor D
 This option will slightly improve performance, since some checks are ommited.
 
 
-## Description
+# Description
 
 The program does not require to add any any 3rd party dependencies 
 (however, you have the opportunity to enable OpenCV for some debug outputs). 
@@ -95,10 +95,10 @@ It is written in C++17.
 All source files required for the compialtion are included in the repository. 
 The main algorithm is located in files `PressureExtrema` and `CycloneDetector`.
 
-## Input files
+# Input files
 This demo uses only single-channel grayscale images for the input. 
 
-# Edit input files
+## Edit input files
 However, as you can see in the code, the image is converted to float array. 
 If you edit the source code, you may load the input file for example directly from GRIB or NetCDF file and use a float array.
 In this case, assign your data to an image `Image2d<float> rawDataFloat` in `main.cpp`.
