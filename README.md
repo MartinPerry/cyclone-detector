@@ -99,12 +99,14 @@ The main algorithm is located in files `PressureExtrema` and `CycloneDetector`.
 This demo uses only single-channel grayscale images for the input. 
 
 We have provided a simple Python script `grib_to_png.py` to convert single-channel GRIB file to the grayscale image.
-*Usage: 
+
+*Usage:* 
 Specify input file `--input_file`. Other parameters are optional. 
 If `--out_w` and/or `--out_h` is set, output image is resized to this resolution. 
 If only one of them is set, the second dimension is auto-calculated to keep aspect ratio of the input data.
 If `--output_file` is set, image is stored in the file with this name (required extension is `png`, since the main program expects data as `png`).
-*Note:
+
+*Note:*
 If data are flipped, modify `values = np.flipud(values)`.
 
 
