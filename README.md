@@ -98,6 +98,16 @@ The main algorithm is located in files `PressureExtrema` and `CycloneDetector`.
 # Input files
 This demo uses only single-channel grayscale images for the input. 
 
+We have provided a simple Python script `grib_to_png.py` to convert single-channel GRIB file to the grayscale image.
+*Usage: 
+Specify input file `--input_file`. Other parameters are optional. 
+If `--out_w` and/or `--out_h` is set, output image is resized to this resolution. 
+If only one of them is set, the second dimension is auto-calculated to keep aspect ratio of the input data.
+If `--output_file` is set, image is stored in the file with this name (required extension is `png`, since the main program expects data as `png`).
+*Note:
+If data are flipped, modify `values = np.flipud(values)`.
+
+
 ## Edit input files
 However, as you can see in the code, the image is converted to float array. 
 If you edit the source code, you may load the input file for example directly from GRIB or NetCDF file and use a float array.
@@ -105,26 +115,26 @@ In this case, assign your data to an image `Image2d<float> rawDataFloat` in `mai
 In the code of `main.cpp`, this can be seen around line 102
 
 ```C++
-	// ======================================================================
-	// NOTE =================================================================
-	// ======================================================================
-	 
-	//If you want to load data from different source (GRIB, NetCDF)
-	//change this to eg:	
-	//Image2d<float> rawDataFloat = GetDataFromGrib(fileName);
-	//where GetDataFromGrib is your method to load data
+// ======================================================================
+// NOTE =================================================================
+// ======================================================================
+ 
+//If you want to load data from different source (GRIB, NetCDF)
+//change this to eg:	
+//Image2d<float> rawDataFloat = GetDataFromGrib(fileName);
+//where GetDataFromGrib is your method to load data
 
-	Image2d<uint8_t> rawDataUint(fileName.c_str());
-	if (rawDataUint.GetPixelsCount() == 0)
-	{
-		MY_LOG_ERROR("Input image %s is empty", fileName.c_str());
-		return 0;
-	}
-	
-	Image2d<float> rawDataFloat = rawDataUint.CreateAs<float>();
-	// ======================================================================
-	// ======================================================================
-	// ======================================================================
+Image2d<uint8_t> rawDataUint(fileName.c_str());
+if (rawDataUint.GetPixelsCount() == 0)
+{
+	MY_LOG_ERROR("Input image %s is empty", fileName.c_str());
+	return 0;
+}
+
+Image2d<float> rawDataFloat = rawDataUint.CreateAs<float>();
+// ======================================================================
+// ======================================================================
+// ======================================================================
 ```
 We have choosed this because we did not want to add any 3rd party dependencies. Usually GRIB or NetCDF libraries
 are large projects and precompiled libraries may not be compatible with all configurations.
