@@ -1,6 +1,6 @@
 # Cyclone detector
 
-Run program as \<program name\> -\<paramy> -\<param\> ...
+Run program as \<program name\> -\<param name\> -\<param name\> ...
 
 *Note:
 For the test program the input file is a single-channel grayscale image in range 0 - 255. 
@@ -10,14 +10,14 @@ The real pressure values are therefore scaled to be in this range.*
 
 - **file** 
 	- default: "" 
-	- Name of input file with raw pressure data (single byte)
+	- Name of input file with the raw pressure data (single byte)
 - **vebrose**
 	- default: false 
 	- verbose mode
 - **cont_step**
 	- default: 10
 	- Contour step **C** (in units based on the input file)
-	 *Note: The contour step is the greyscale value step. The greyscale values can be converted to Pa / hPa based on interval mappings*
+	 *Note: The contour step is the grayscale value step for single-channel grayscale image. The grayscale values can be converted to Pa / hPa based on interval mappings*
 - **small_area_threshold**
 	- default: 10000
 	- Small area threshold **T**. Extrema must occupy at least area of this size in km^2. 
@@ -66,7 +66,7 @@ If program is compiled without `DISABLE_DEBUG_OUTPUT` (default state) we can out
 	- Directory where we want to store the intermediate results. If empty, disable this feature
 - **debug_name**
 	- default: "debug" 
-	- Intermediate file name prefix
+	- Intermediate file name prefix. Each debug file name will have this prefix and the rest of the name is taken form the input name
 
 
 # Compilation
@@ -98,7 +98,8 @@ The main algorithm is located in files `PressureExtrema` and `CycloneDetector`.
 # Input files
 This demo uses only single-channel grayscale images for the input. 
 
-We have provided a simple Python script `grib_to_png.py` to convert single-channel GRIB file to the grayscale image.
+Since most of the NWP models have outputs in GRIB, 
+we have provided a simple Python script `grib_to_png.py` to convert single-channel GRIB file to the grayscale image.
 
 *Usage:* 
 Specify input file `--input_file`. Other parameters are optional. 
@@ -124,7 +125,9 @@ In the code of `main.cpp`, this can be seen around line 102
 //If you want to load data from different source (GRIB, NetCDF)
 //change this to eg:	
 //Image2d<float> rawDataFloat = GetDataFromGrib(fileName);
-//where GetDataFromGrib is your method to load data
+//or
+//Image2d<float> rawDataFloat = GetDataFromNetCDF(fileName);
+//where GetDataFromGrib/GetDataFromNetCDF is your method to load data
 
 Image2d<uint8_t> rawDataUint(fileName.c_str());
 if (rawDataUint.GetPixelsCount() == 0)
@@ -138,8 +141,8 @@ Image2d<float> rawDataFloat = rawDataUint.CreateAs<float>();
 // ======================================================================
 // ======================================================================
 ```
-We have choosed this because we did not want to add any 3rd party dependencies. Usually GRIB or NetCDF libraries
-are large projects and precompiled libraries may not be compatible with all configurations.
+We have choosen this because we did not want to add any 3rd party dependencies. 
+Usually, GRIB or NetCDF libraries are large projects and precompiled libraries may not be compatible with all configurations.
 This way, the demo program is independent on external libraries and can be used as it is.
 
 
