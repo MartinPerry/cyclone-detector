@@ -96,8 +96,8 @@ The main algorithm is located in files `PressureExtrema` and `CycloneDetector`.
 # Input files
 This demo uses only single-channel grayscale images for the input. 
 
-Since most of the NWP models have outputs in GRIB, 
-we have provided a simple Python script `grib_to_png.py` to convert single-channel GRIB file to the grayscale image.
+Since most of the NWP models have outputs in GRIB or NetCDF, 
+we have provided two simple Python script `grib_to_png.py` and `netcdf_to_png.py` to convert single-channel GRIB/NetCDF file to the grayscale image.
 
 *Usage:* 
 Specify input file `--input_file`. Other parameters are optional. 
@@ -143,6 +143,3 @@ We have chosen this because we did not want to add any 3rd party dependencies.
 Usually, GRIB or NetCDF libraries are large projects and precompiled libraries may not be compatible with all configurations.
 This way, the demo program is independent on external libraries and can be used as it is.
 
-
-
-https://guides.github.com/features/mastering-markdown/
