@@ -42,7 +42,7 @@ public:
 	float GetDataMax() const;
 	
 	void SetAreaLatitudeCorrectionFactor(double f);
-	void SetMinCentersDistanceThresholdPixel(int v);
+	void SetMinCentersDistanceThreshold(DistanceThreshold v);
 	void SetSmallAreaThreshold(AreaThreshold v);
 	void SetExtremaCorrectRatio(double v);
 	void SetExtremaMaskRadius(int r);
@@ -66,7 +66,7 @@ protected:
 
 	std::vector<Contour> contours; //all contours
 	std::vector<PressureExtrema> extremas; //only contours enclosing extrema
-	
+
 	double latCorrectionFactor;
 	AreaThreshold smallAreaThreshold;
 
@@ -75,7 +75,7 @@ protected:
 
 	double extremaCorrectRatio;
 
-	int minCentersDistanceThresholdPixel;
+	DistanceThreshold minCentersDistanceThreshold;
 
 	void FindContours();
 	void BuildContoursHierarchy();
@@ -91,10 +91,18 @@ protected:
 	Derivatives CreateDerivatives();
 
 	void FindExtrema();
+	void InitExtremasCenters(PressureExtrema::PressureType type);
+	void FilterExtremas();
+	double CalcPressureDropsOnSmallArea(PressureExtrema& c) const;
+	bool DetectLargeDropsOnSmallArea(PressureExtrema& c) const;
 
-	void RenderContours(const std::vector<Contour> & c) const;
+
+	//debug rendering	
+	void RenderContours(const std::vector<Contour>& c) const;
 	void RenderContours();
+	void RenderAreas(const Image2d<uint8_t>& areas);
 };
+
 
 
 

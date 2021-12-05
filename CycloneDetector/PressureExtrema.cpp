@@ -3,6 +3,12 @@
 #include <stack>
 
 #include "./MapProjections/Projections/Equirectangular.h"
+#include "./MapProjections/Projections/Mercator.h"
+#include "./MapProjections/Projections/LambertConic.h"
+
+#include "./RasterData/Image2d.h"
+
+#include "./Utils/Logger.h"
 
 PressureExtrema::PressureExtrema(const Contour & c) :
 	contour(c),
@@ -39,17 +45,36 @@ void PressureExtrema::AddPixel(int x, int y)
 	px.emplace_back(x, y);
 }
 
+
+Projections::Coordinate PressureExtrema::GetCenterGps(Projections::IProjectionInfo* proj) const
+{
+	if (auto eq = dynamic_cast<Projections::Equirectangular*>(proj))
+	{
+		return eq->ProjectInverse<float>({ center.x, center.y });
+	}
+	else if (auto me = dynamic_cast<Projections::Mercator*>(proj))
+	{
+		return me->ProjectInverse<float>({ center.x, center.y });
+	}
+	else if (auto lc = dynamic_cast<Projections::LambertConic*>(proj))
+	{
+		return lc->ProjectInverse<float>({ center.x, center.y });
+	}
+
+	MY_LOG_ERROR("Unknown projection");
+	return Projections::Coordinate();
+}
+
 /// <summary>
 /// Get center of AABB
 /// </summary>
 /// <param name="cx"></param>
 /// <param name="cy"></param>
-void PressureExtrema::GetCenterIndex(int & cx, int & cy) const
+void PressureExtrema::GetAabbCenterIndex(int& cx, int& cy) const
 {
 	cx = minX + (maxX - minX) / 2;
 	cy = minY + (maxY - minY) / 2;
 }
-
 int PressureExtrema::GetWidth() const
 {
 	return ((maxX - minX) + 1);
@@ -74,11 +99,6 @@ double PressureExtrema::GetSizeKm2(Projections::IProjectionInfo* proj) const
 	if (auto eq = dynamic_cast<Projections::Equirectangular*>(proj))
 	{
 		std::vector<Projections::Pixel<float>> tmp;
-		for (size_t i = 0; i < px.size(); i++)
-		{
-			//tmp.push_back({ float(px[i].x), float(px[i].y) });
-		}
-
 		tmp.push_back({ float(minX), float(minY) });
 		tmp.push_back({ float(maxX), float(minY) });
 		tmp.push_back({ float(maxX), float(maxY) });
@@ -86,7 +106,28 @@ double PressureExtrema::GetSizeKm2(Projections::IProjectionInfo* proj) const
 
 		return Projections::ProjectionUtils::CalcArea(tmp, eq) / (1000.0 * 1000.0);
 	}
+	else if (auto me = dynamic_cast<Projections::Mercator*>(proj))
+	{
+		std::vector<Projections::Pixel<float>> tmp;
+		tmp.push_back({ float(minX), float(minY) });
+		tmp.push_back({ float(maxX), float(minY) });
+		tmp.push_back({ float(maxX), float(maxY) });
+		tmp.push_back({ float(minX), float(maxY) });
 
+		return Projections::ProjectionUtils::CalcArea(tmp, me) / (1000.0 * 1000.0);
+	}
+	else if (auto lc = dynamic_cast<Projections::LambertConic*>(proj))
+	{
+		std::vector<Projections::Pixel<float>> tmp;
+		for (size_t i = 0; i < px.size(); i++)
+		{
+			tmp.push_back({ float(px[i].x), float(px[i].y) });
+		}
+
+		return Projections::ProjectionUtils::CalcArea(tmp, lc) / (1000.0 * 1000.0);
+	}
+
+	MY_LOG_ERROR("Unknown projection - return area in pixels");
 	return GetSizePixels();
 }
 
@@ -116,7 +157,36 @@ void PressureExtrema::Clear()
 
 	this->type = PressureType::NONE;
 	this->bestPressure = std::nullopt;
-	this->center = MyMath::Vector2f::Infinity();	
+	this->center = MyMath::Vector2f::Infinity();
+	this->centerValue = 0;
+}
+
+
+bool PressureExtrema::HasPixels() const
+{
+	return px.size() != 0;
+}
+
+bool PressureExtrema::CheckArea(const AreaThreshold& areaThreshold) const
+{
+	double area = 0;
+
+	if (areaThreshold.unit == AreaThreshold::Unit::Km2)
+	{
+		area = this->GetSizeKm2(areaThreshold.proj);
+	}
+	else
+	{
+		area = this->GetSizePixels();
+	}
+
+	if (area <= areaThreshold.value)
+	{
+		//AABB area is too small (under threshold)		
+		return false;
+	}
+
+	return true;
 }
 
 /// <summary>
@@ -126,7 +196,7 @@ void PressureExtrema::Clear()
 /// From the sub-areas, we use the largest one
 /// </summary>
 /// <param name="type"></param>
-void PressureExtrema::CreateAreas(PressureType type, const AreaThreshold& areaThreshold)
+void PressureExtrema::InitCenter(PressureType type, const Image2d<float>& rawData)
 {
 	if (px.size() == 0)
 	{
@@ -134,55 +204,39 @@ void PressureExtrema::CreateAreas(PressureType type, const AreaThreshold& areaTh
 		return;
 	}
 
-	double area = 0;
-		
-	if (areaThreshold.unit == AreaThreshold::Unit::Km2)
-	{
-		area = this->GetSizeKm2(areaThreshold.proj);
-	}
-	else 
-	{
-		area = this->GetSizePixels();
-	}
+	//all pixels inside the contour can be "disconnected"
+	//there can be multiple "components"
+	//we use flood-fill to get connected components	
+	//there is always at least one area
+	std::list<PressureArea> areas = this->CreateAreasInner(rawData);
 
-	if (area <= areaThreshold.value)	
+	for (auto& a : areas)
 	{
-		//AABB area is too small (under threshold)		
-		return;
-	}
-	
-	//all pixels in the contour can be "disconnected"
-	//we create connected components from them via flood-fill
-	//each component is 
-	std::list<PressureArea> areas = this->CreateAreasInner();
-
-	//std::list<PressureArea> areas = std::move(std::get<0>(tmp));
-	//std::unordered_map<int, PressureArea *> areasLut = std::move(std::get<1>(tmp));
-	
-	if (bestPressure.has_value() == false)
-	{
-		bestPressure = areas.front();
-
-		int cx, cy;
-		bestPressure->GetCenterIndex(cx, cy);
-
-		this->type = type;
-		this->center = MyMath::Vector2(cx, cy);
-	}
-
-	for (auto & a : areas)
-	{
-		if (a.pixels.size() > bestPressure->pixels.size())
-		{			
+		//take the larger area
+		if ((bestPressure.has_value() == false) || (a.pixels.size() > bestPressure->pixels.size()))
+		{
 			bestPressure = a;
 
-			int cx, cy;
-			bestPressure->GetCenterIndex(cx, cy);
-
 			this->type = type;
-			this->center = MyMath::Vector2(cx, cy);
+			if (type == PressureType::LOW)
+			{
+				this->center = MyMath::Vector2(bestPressure->minValuePx.x, bestPressure->minValuePx.y);
+				this->centerValue = bestPressure->minValue;
+			}
+			else if (type == PressureType::HIGH)
+			{
+				this->center = MyMath::Vector2(bestPressure->maxValuePx.x, bestPressure->maxValuePx.y);
+				this->centerValue = bestPressure->maxValue;
+			}
+			else
+			{
+				int cx, cy;
+				bestPressure->GetAabbCenterIndex(cx, cy);
+				this->center = MyMath::Vector2(cx, cy);
+				this->centerValue = *rawData.GetPixelStart(cx, cy);
+			}
 		}
-	}	
+	}
 }
 
 
@@ -230,7 +284,7 @@ bool PressureExtrema::TestAreaPixel(size_t ind, std::unordered_set<int> & pixels
 /// Each component is single pressure area within the extrema
 /// </summary>
 /// <returns></returns>
-std::list<PressureExtrema::PressureArea> PressureExtrema::CreateAreasInner()
+std::list<PressureExtrema::PressureArea> PressureExtrema::CreateAreasInner(const Image2d<float>& rawData)
 {
 	//https://lodev.org/cgtutor/floodfill.html
 
@@ -238,14 +292,14 @@ std::list<PressureExtrema::PressureArea> PressureExtrema::CreateAreasInner()
 
 	//create list of pixel aligned to [0, 0] ... [AABB_w, AABB_h]
 	std::unordered_set<int> pixels;
-	for (auto p : px)
+	for (const auto& p : px)
 	{
 		pixels.insert(this->GetIndexFromPosition(p.x - minX, p.y - minY));
 	}
 
 	std::list<PressureArea> fa; //list of single pressure areaa
-	
-	std::unordered_map<int, PressureArea *> result; //map of pixels to the area
+
+	std::unordered_map<int, PressureArea*> result; //map of pixels to the area
 													//[pixel index] = pointer to PressureArea to which pixel belongs
 
 	int w = this->GetWidth();
@@ -267,7 +321,7 @@ std::list<PressureExtrema::PressureArea> PressureExtrema::CreateAreasInner()
 
 			//create bounding box in real pixels 
 			//(translate pixels back to their original position)
-			PressureArea * f = &(fa.emplace_back());
+			PressureArea* f = &(fa.emplace_back());
 			f->minX = (px.x + minX);
 			f->minY = (px.y + minY);
 			f->maxX = (px.x + minX);
@@ -308,6 +362,7 @@ std::list<PressureExtrema::PressureArea> PressureExtrema::CreateAreasInner()
 				while ((x1 < w) && (TestAreaPixel(ind, pixels, result)))
 				{
 					{
+						//recreate pixel [xx, yy] in the original image
 						int xx, yy;
 						this->GetPositionFromIndex(ind, xx, yy);
 
@@ -322,6 +377,21 @@ std::list<PressureExtrema::PressureArea> PressureExtrema::CreateAreasInner()
 
 						//add pixel to area				
 						f->pixels.emplace_back(xx, yy);
+
+						float val = *rawData.GetPixelStart(xx, yy);
+						if (val > f->maxValue)
+						{
+							f->maxValue = val;
+							f->maxValuePx.x = xx;
+							f->maxValuePx.y = yy;
+						}
+						if (val < f->minValue)
+						{
+							f->minValue = val;
+							f->minValuePx.x = xx;
+							f->minValuePx.y = yy;
+						}
+
 						result[ind] = f;
 					}
 

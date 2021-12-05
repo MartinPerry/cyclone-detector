@@ -19,56 +19,81 @@ namespace Projections
 #include "./Graphics/2d/Polygon.h"
 #include "./RasterData/ImageUtils.h"
 
-//============================================================================
+#include "./MapProjections/MapProjectionStructures.h"
 
-struct AreaThreshold
+//============================================================================
+struct PressureThreshold
 {
-	enum class Unit { Pixels, Km2 };
+public:
+	enum class Unit { Pixels, Km2, Km };
 
 	double value;
 	Unit unit;
 	Projections::IProjectionInfo* proj;
 
-	constexpr static AreaThreshold CreateKm2(double value, Projections::IProjectionInfo* proj)
-	{
-		return AreaThreshold(value, AreaThreshold::Unit::Km2, proj);
-	}
 
-	constexpr static AreaThreshold CreatePixels(double value)
-	{
-		return AreaThreshold(value, AreaThreshold::Unit::Pixels, nullptr);
-	}
-
-	constexpr AreaThreshold() :
-		value(0),
-		unit(Unit::Pixels),
-		proj(nullptr)
-	{
-	}
-
-	constexpr AreaThreshold(double value, Unit unit, Projections::IProjectionInfo* proj) :
-		value(value),
-		unit(unit),
-		proj(proj)
-	{
-	}
-
-	constexpr AreaThreshold(const AreaThreshold & area) :
+	constexpr PressureThreshold(const PressureThreshold& area) :
 		value(area.value),
 		unit(area.unit),
 		proj(area.proj)
 	{
 	}
 
-	AreaThreshold& operator=(AreaThreshold other)
-	{		
+	PressureThreshold& operator=(PressureThreshold other)
+	{
 		value = other.value;
 		unit = other.unit;
 		proj = other.proj;
 		return *this;
 	}
+
+protected:
+
+	constexpr PressureThreshold(double value, Unit unit, Projections::IProjectionInfo* proj) :
+		value(value),
+		unit(unit),
+		proj(proj)
+	{
+	}
 };
 
+struct AreaThreshold : public PressureThreshold
+{
+public:
+	constexpr static AreaThreshold CreateKm2(double value, Projections::IProjectionInfo* proj)
+	{
+		return AreaThreshold(value, PressureThreshold::Unit::Km2, proj);
+	}
+
+	constexpr static AreaThreshold CreatePixels(double value)
+	{
+		return AreaThreshold(value, PressureThreshold::Unit::Pixels, nullptr);
+	}
+
+	constexpr AreaThreshold(double value, Unit unit, Projections::IProjectionInfo* proj) :
+		PressureThreshold(value, unit, proj)
+	{
+	}
+};
+
+struct DistanceThreshold : public PressureThreshold
+{
+public:
+	constexpr static DistanceThreshold CreateKm(double value, Projections::IProjectionInfo* proj)
+	{
+		return DistanceThreshold(value, PressureThreshold::Unit::Km, proj);
+	}
+
+	constexpr static DistanceThreshold CreatePixels(double value)
+	{
+		return DistanceThreshold(value, PressureThreshold::Unit::Pixels, nullptr);
+	}
+
+	constexpr DistanceThreshold(double value, Unit unit, Projections::IProjectionInfo* proj) :
+		PressureThreshold(value, unit, proj)
+	{
+	}
+};
 
 //============================================================================
 
@@ -123,6 +148,7 @@ public:
 	
 	PressureType type;
 	MyMath::Vector2f center;
+	double centerValue;
 	
 
 	PressureExtrema(const Contour & c);
@@ -131,7 +157,8 @@ public:
 
 	void AddPixel(int x, int y);
 	
-	void GetCenterIndex(int & cx, int & cy) const;
+	Projections::Coordinate GetCenterGps(Projections::IProjectionInfo* proj) const;
+	void GetAabbCenterIndex(int& cx, int& cy) const;
 
 	int GetWidth() const;
 	int GetHeight() const;
@@ -142,8 +169,10 @@ public:
 	void ClearPixels();
 	void Clear();
 
+	bool HasPixels() const;
+	bool CheckArea(const AreaThreshold& areaThresholdSize) const;
+	void InitCenter(PressureType type, const Image2d<float>& rawData);
 
-	void CreateAreas(PressureType type, const AreaThreshold& areaThresholdSize);
 private:
 
 
@@ -155,8 +184,22 @@ private:
 		int maxY = 0;
 		std::vector<ImageUtils::Pixel> pixels;
 
+		ImageUtils::Pixel minValuePx;
+		ImageUtils::Pixel maxValuePx;
+		double minValue = std::numeric_limits<double>::max();
+		double maxValue = std::numeric_limits<double>::lowest();
+
 		void Clear()
 		{
+			minValuePx.x = -1;
+			minValuePx.y = -1;
+
+			maxValuePx.x = -1;
+			maxValuePx.y = -1;
+
+			minValue = std::numeric_limits<double>::max();
+			maxValue = std::numeric_limits<double>::lowest();
+
 			minX = std::numeric_limits<int>::max();
 			minY = std::numeric_limits<int>::max();
 			maxX = 0;
@@ -164,11 +207,17 @@ private:
 			pixels.clear();
 		}
 
-		void GetCenterIndex(int & cx, int & cy) const
+		/// <summary>
+		/// Get center index as center of AABB - fast buf not accurate
+		/// </summary>
+		/// <param name="cx"></param>
+		/// <param name="cy"></param>
+		void GetAabbCenterIndex(int& cx, int& cy) const
 		{
 			cx = minX + (maxX - minX) / 2;
 			cy = minY + (maxY - minY) / 2;
 		}
+
 
 		int GetSize() const
 		{
@@ -192,7 +241,7 @@ private:
 	bool TestAreaPixel(size_t ind, std::unordered_set<int> & pixels,
 		std::unordered_map<int, PressureArea *> & result);
 
-	std::list<PressureArea> CreateAreasInner();
+	std::list<PressureArea> CreateAreasInner(const Image2d<float>& rawData);
 };
 
 

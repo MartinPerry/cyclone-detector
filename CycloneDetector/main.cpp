@@ -36,11 +36,14 @@ int main(int argc, char ** argv)
 	double areaLatCorFactor = 0.0;
 
 	CmdParser cmd(argc, argv);	
-	cmd.AddTarget({ "file", "Name of input file with raw pressure data (single byte)", true }, &fileName);
+	cmd.AddTarget({ "file", "Name of input file with raw pressure data (single byte)",
+		true }, &fileName);
 	
-	cmd.AddTarget({ "verbose", "Verbose mode (default: false)", true }, &verbose);
+	cmd.AddTarget({ "verbose", "Verbose mode (default: false)", 
+		true }, &verbose);
 		
-	cmd.AddTarget({ "cont_step", "Contour step 'C' (in units based on input file - grayscale-level values in this demo) (default: 10)", true }, &contourStep);
+	cmd.AddTarget({ "cont_step", "Contour step 'C' (in units based on input file - grayscale-level values in this demo) (default: 10)", 
+		true }, &contourStep);
 		
 	cmd.AddTarget({ "small_area_threshold", 
 					"Small area threshold 'T'. Extrema must have occupy at least area of this size in km^2. "
@@ -49,15 +52,22 @@ int main(int argc, char ** argv)
 					"(default: 10'000)", 
 		true }, &smallAreaThreshold);
 	
-	cmd.AddTarget({ "mask_radius", "Extrema mask radius 'r'. Size of area where to look for extrema (default: 0 = automatic)", true }, &extremaMaskRadius);
+	cmd.AddTarget({ "mask_radius", "Extrema mask radius 'r'. Size of area where to look for extrema (default: 0 = automatic)", 
+		true }, &extremaMaskRadius);
 
-	cmd.AddTarget({ "min_dist", "Minimal distance 'D' between extrema. To disable this feature, set value to 0. (default: 0)", true }, &minCenterDist);
+	cmd.AddTarget({ "min_dist", "Minimal distance 'D' between extrema. To disable this feature, set value to 0. (default: 0)", 
+		true }, &minCenterDist);
 
-	cmd.AddTarget({ "min_lat", "Minimal latitude of the image area AABB. (default: -90)", true }, &latMin);
-	cmd.AddTarget({ "max_lat", "Maximal latitude of the image area AABB. (default: 90)", true }, &latMax);
-	cmd.AddTarget({ "min_lon", "Minimal longitude of the image area AABB. (default: -180)", true }, &lonMin);
-	cmd.AddTarget({ "max_lon", "Maximal longitude of the image area AABB. (default: 180)", true }, &lonMax);
-	cmd.AddTarget({ "proj_type", "Type of input data projection. ? = unknown, eq = Equirectangular, me = Meractor (default: eq)", true }, &projType);
+	cmd.AddTarget({ "min_lat", "Minimal latitude of the image area AABB. (default: -90)", 
+		true }, &latMin);
+	cmd.AddTarget({ "max_lat", "Maximal latitude of the image area AABB. (default: 90)", 
+		true }, &latMax);
+	cmd.AddTarget({ "min_lon", "Minimal longitude of the image area AABB. (default: -180)", 
+		true }, &lonMin);
+	cmd.AddTarget({ "max_lon", "Maximal longitude of the image area AABB. (default: 180)", 
+		true }, &lonMax);
+	cmd.AddTarget({ "proj_type", "Type of input data projection. ? = unknown, eq = Equirectangular, me = Meractor (default: eq)", 
+		true }, &projType);
 
 	//=======================================================
 
@@ -130,7 +140,8 @@ int main(int argc, char ** argv)
 
 	//pf.SetAreaLatitudeCorrectionFactor(areaLatCorFactor);
 
-	AreaThreshold th;
+	std::optional<AreaThreshold> th;
+	std::optional<DistanceThreshold> dt;
 
 	Projections::Coordinate bbMin, bbMax;
 	bbMin.lat = Latitude::deg(latMin); bbMin.lon = Longitude::deg(lonMin);
@@ -144,6 +155,11 @@ int main(int argc, char ** argv)
 			Projections::STEP_TYPE::PIXEL_BORDER, false);
 
 		th = AreaThreshold::CreateKm2(smallAreaThreshold, eq);
+
+		if (minCenterDist > 0)
+		{
+			dt = DistanceThreshold::CreateKm(minCenterDist, eq);
+		}
 	}
 	else if (projType == "me")
 	{
@@ -153,15 +169,25 @@ int main(int argc, char ** argv)
 			Projections::STEP_TYPE::PIXEL_BORDER, false);
 
 		th = AreaThreshold::CreateKm2(smallAreaThreshold, me);
+
+		if (minCenterDist > 0)
+		{
+			dt = DistanceThreshold::CreateKm(minCenterDist, me);
+		}
 	}
 	else if (projType == "?")
 	{		
 		th = AreaThreshold::CreatePixels(smallAreaThreshold);
 		pf.SetAreaLatitudeCorrectionFactor(areaLatCorFactor);
+
+		if (minCenterDist > 0)
+		{
+			dt = DistanceThreshold::CreatePixels(minCenterDist);
+		}
 	}
 
-	pf.SetMinCentersDistanceThresholdPixel(minCenterDist);	
-	pf.SetSmallAreaThreshold(th);
+	if (dt.has_value()) pf.SetMinCentersDistanceThreshold(dt.value());
+	if (th.has_value()) pf.SetSmallAreaThreshold(th.value());
 	pf.SetExtremaCorrectRatio(extremaCorRatio);
 
 	pf.SetContoursStep(contourStep);

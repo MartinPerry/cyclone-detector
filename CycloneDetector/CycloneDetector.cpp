@@ -45,7 +45,7 @@ CycloneDetector::CycloneDetector(const char * fileName, int w, int h) :
 	latCorrectionFactor(15),
 	maskRadius(20),
 	contourStep(200),
-	minCentersDistanceThresholdPixel(22),
+	minCentersDistanceThreshold(DistanceThreshold::CreatePixels(0)),
 	smallAreaThreshold(AreaThreshold::CreatePixels(100)),
 	extremaCorrectRatio(0.6)
 {
@@ -64,7 +64,7 @@ CycloneDetector::CycloneDetector(const std::vector<float> & data, int w, int h) 
 	latCorrectionFactor(15),
 	maskRadius(20),
 	contourStep(200),
-	minCentersDistanceThresholdPixel(22),
+	minCentersDistanceThreshold(DistanceThreshold::CreatePixels(0)),
 	smallAreaThreshold(AreaThreshold::CreatePixels(100)),
 	extremaCorrectRatio(0.6)
 {
@@ -80,7 +80,7 @@ CycloneDetector::CycloneDetector(Image2d<float>&& input) :
 	latCorrectionFactor(15),
 	maskRadius(20),
 	contourStep(200),
-	minCentersDistanceThresholdPixel(22),
+	minCentersDistanceThreshold(DistanceThreshold::CreatePixels(0)),
 	smallAreaThreshold(AreaThreshold::CreatePixels(100)),
 	extremaCorrectRatio(0.6)
 {
@@ -177,9 +177,9 @@ void CycloneDetector::SetAreaLatitudeCorrectionFactor(double f)
 /// To disable this feature, set value to 0
 /// </summary>
 /// <param name="v"></param>
-void CycloneDetector::SetMinCentersDistanceThresholdPixel(int v)
+void CycloneDetector::SetMinCentersDistanceThreshold(DistanceThreshold v)
 {
-	this->minCentersDistanceThresholdPixel = v;
+	this->minCentersDistanceThreshold = v;
 }
 
 /// <summary>
@@ -660,10 +660,10 @@ CycloneDetector::Derivatives CycloneDetector::CreateDerivatives()
 void CycloneDetector::FindExtrema()
 {	
 #ifndef DISABLE_DEBUG_OUTPUT
-	Image2d<uint8_t> test2;
+	Image2d<uint8_t> areas;
 	if (CycloneDetector::debugDirName != "")
 	{
-		test2 = ColorSpace::ConvertGrayToRgb(rawData.CreateAsMapped<uint8_t>(0, 255));
+		areas = ColorSpace::ConvertGrayToRgb(rawData.CreateAsMapped<uint8_t>(0, 255));
 	}
 #endif
 
@@ -815,15 +815,15 @@ void CycloneDetector::FindExtrema()
 
 					if (type == PressureExtrema::PressureType::HIGH)
 					{
-						test2[i][0] = 255;
-						test2[i][1] = 0;
-						test2[i][2] = 0;
+						areas[i][0] = 255;
+						areas[i][1] = 0;
+						areas[i][2] = 0;
 					}
 					else
 					{
-						test2[i][0] = 0;
-						test2[i][1] = 0;
-						test2[i][2] = 255;
+						areas[i][0] = 0;
+						areas[i][1] = 0;
+						areas[i][2] = 255;
 					}
 				}
 #endif
@@ -831,56 +831,16 @@ void CycloneDetector::FindExtrema()
 		}
 
 
-		for (auto & c : extremas)
-		{			
-			c.CreateAreas(type, smallAreaThreshold);
-		}
+		this->InitExtremasCenters(type);
 		
 		//====== optional step ====
 		//for each extrema center find the closest center in another
 		//extrema
 
-		if (minCentersDistanceThresholdPixel > 0)
-		{
-			float threshold2 = static_cast<float>(minCentersDistanceThresholdPixel * minCentersDistanceThresholdPixel);
-
-			for (size_t i = 0; i < extremas.size(); i++)
-			{
-				auto& c1 = extremas[i];
-				if (c1.IsValid() == false)
-				{
-					continue;
-				}
-
-				for (size_t j = i + 1; j < extremas.size(); j++)
-				{
-					auto& c2 = extremas[j];
-					if (c2.IsValid() == false)
-					{
-						continue;
-					}
-
-					float dist = c1.center.DistanceSquared(c2.center);
-
-					if ((dist != 0) && (dist < threshold2))
-					{
-						//extremas are too close
-						//remove the smaller one
-						if (c1.GetSizePixels() < c2.GetSizePixels())
-						{
-							c1.Clear();
-						}
-						else
-						{
-							c2.Clear();
-						}
-					}
-
-				}
-			}
-		}
+		this->FilterExtremas();
 		//================================
 
+		
 		//we need to clear all pixels from extremas
 		//because in the next iteration, HIGH pressure will be processed
 		//the same area can have low / high pressure
@@ -896,73 +856,270 @@ void CycloneDetector::FindExtrema()
 	}
 
 #ifndef DISABLE_DEBUG_OUTPUT
-
-	if (CycloneDetector::debugDirName != "")
-	{
-		uint8_t col[3] = { 255, 255, 255 };
-
-		for (auto& c : contours)
-		{
-			for (size_t i = 0; i < c.c.Size() - 1; i++)
-			{
-				auto p1 = c.c[i];
-				auto p2 = c.c[i + 1];
-
-#ifdef HAVE_OPENCV
-				test2.RunOpenCV([&](auto img, auto m) {
-					cv::line(m,
-						cv::Point(int(p1.x), int(p1.y)),
-						cv::Point(int(p2.x), int(p2.y)),
-						cv::Scalar(col[0], col[1], col[2]),
-						1);
-					});
-#else
-				ImageUtils::DrawLine(test2, col,
-					int(p1.x), int(p1.y),
-					int(p2.x), int(p2.y));
-#endif
-			}
-		}
-
-		col[0] = 255;
-		col[1] = 0;
-		col[2] = 0;
-
-		for (auto& c : extremas)
-		{
-			for (size_t i = 0; i < c.contour.c.Size() - 1; i++)
-			{
-				auto p1 = c.contour.c[i];
-				auto p2 = c.contour.c[i + 1];
-
-
-#ifdef HAVE_OPENCV
-				test2.RunOpenCV([&](auto img, auto m) {
-					cv::line(m,
-						cv::Point(int(p1.x), int(p1.y)),
-						cv::Point(int(p2.x), int(p2.y)),
-						cv::Scalar(col[0], col[1], col[2]),
-						2);
-					});
-#else
-				ImageUtils::DrawLine(test2, col,
-					int(p1.x), int(p1.y),
-					int(p2.x), int(p2.y));
-#endif
-			}
-
-		}
-
-		std::string output = debugDirName;
-		output += debugName;
-		output += "_candidate_areas.png";
-
-		test2.Save(output.c_str());
-	}
+	RenderAreas(areas);
 #endif
 
 
 }
+
+/// <summary>
+/// Iterate all found extremas and init its center if it is a valid extrema
+/// - area has some pixels
+/// - area is under the threshold size
+/// - it is large pressure drop on small area
+/// </summary>
+/// <param name="type"></param>
+void CycloneDetector::InitExtremasCenters(PressureExtrema::PressureType type)
+{
+	std::vector<PressureExtrema*> largeDrops;
+
+	for (auto& c : extremas)
+	{
+		if (c.HasPixels() == false)
+		{
+			continue;
+		}
+
+		if (c.CheckArea(smallAreaThreshold) == false)
+		{
+			if (this->DetectLargeDropsOnSmallArea(c) == false)
+			{
+				//small pressure drop - ignore this small area
+				continue;
+			}
+
+			largeDrops.push_back(&c);
+		}
+
+		c.InitCenter(type, this->rawData);
+	}
+
+	//iterate large drops and remove close ones
+	//because there can be problems due to precision where multiple centers are detected
+	//because contours may overlap
+	//use only pixels, since we are interested only in close neighborhood
+	//that was created by large pressure drop check
+
+	float threshold2 = static_cast<float>(this->maskRadius * this->maskRadius);
+
+	for (size_t i = 0; i < largeDrops.size(); i++)
+	{
+		auto c1 = largeDrops[i];
+		if (c1->IsValid() == false)
+		{
+			continue;
+		}
+
+		for (size_t j = i + 1; j < largeDrops.size(); j++)
+		{
+			auto c2 = largeDrops[j];
+			if (c2->IsValid() == false)
+			{
+				continue;
+			}
+
+			float dist = c1->center.DistanceSquared(c2->center);
+
+			if ((dist != 0) && (dist < threshold2))
+			{
+				//extremas are too close
+				//remove the smaller one
+				if (type == PressureExtrema::PressureType::HIGH)
+				{
+					if (c1->centerValue < c2->centerValue)
+					{
+						c1->Clear();
+					}
+					else
+					{
+						c2->Clear();
+					}
+				}
+				else
+				{
+					if (c1->centerValue > c2->centerValue)
+					{
+						c1->Clear();
+					}
+					else
+					{
+						c2->Clear();
+					}
+				}
+			}
+
+		}
+	}
+
+}
+
+
+double CycloneDetector::CalcPressureDropsOnSmallArea(PressureExtrema& c) const
+{
+	double maxDif = 0;
+	auto pt = c.contour.c[0];
+	rawData.ForEachPixelInNeighborhood(pt.x, pt.y,
+		NeighborhoodKernel::CreateFromRadius(2 * this->maskRadius), //30
+		[&](const float* val, int x, int y) {
+			double dif = std::abs(val[0] - c.contour.t);
+			if (dif > maxDif)
+			{
+				maxDif = dif;
+			}
+		});
+
+	return maxDif;
+}
+
+/// <summary>
+/// check neighborhood of contour (for simplicity use start pixel position)
+/// if there is large pressure drop
+/// keep this center even if its area is small
+/// </summary>
+/// <param name="c"></param>
+/// <returns></returns>
+bool CycloneDetector::DetectLargeDropsOnSmallArea(PressureExtrema& c) const
+{
+	double maxDif = this->CalcPressureDropsOnSmallArea(c);
+
+	if (maxDif < this->contourStep)
+	{
+		//small pressure drop - ignore this small area
+		return false;
+	}
+
+	/*
+	//small area - to locate center correctly, clear area and add all pixels
+	//from the nieghborhood - in this area
+	//we will look for min/max pressure center
+	c.ClearPixels();
+
+	rawData.ForEachPixelInNeighborhood(pt.x, pt.y,
+		NeighborhoodKernel::CreateFromRadius(this->maskRadius), //30
+		[&](const float* val, int x, int y) {
+			c.AddPixel(x, y);
+		});
+	*/
+
+	//large pressure drop - keep it
+	return true;
+}
+
+
+/// <summary>
+/// Filter extremas by distance
+/// If two extremas are too close (pixels or km), keep the one with larger / smaller value
+/// (based on extrema type). If type of extremas is different, keep them both
+/// even if they are close
+/// </summary>
+void CycloneDetector::FilterExtremas()
+{
+	if (minCentersDistanceThreshold.value <= 0)
+	{
+		return;
+	}
+
+	float threshold = static_cast<float>(minCentersDistanceThreshold.value);
+
+	if (minCentersDistanceThreshold.unit == DistanceThreshold::Unit::Pixels)
+	{
+		threshold *= minCentersDistanceThreshold.value;
+	}
+
+	Projections::Coordinate gps1;
+	Projections::Coordinate gps2;
+
+	for (size_t i = 0; i < extremas.size(); i++)
+	{
+		auto& c1 = extremas[i];
+		if (c1.IsValid() == false)
+		{
+			continue;
+		}
+
+		if (minCentersDistanceThreshold.unit == DistanceThreshold::Unit::Km)
+		{
+			gps1 = c1.GetCenterGps(minCentersDistanceThreshold.proj);
+		}
+
+		for (size_t j = i + 1; j < extremas.size(); j++)
+		{
+			auto& c2 = extremas[j];
+			if (c2.IsValid() == false)
+			{
+				continue;
+			}
+
+			if (c1.type != c2.type)
+			{
+				continue;
+			}
+
+			float dist = 0;
+			if (minCentersDistanceThreshold.unit == DistanceThreshold::Unit::Pixels)
+			{
+				//use pixel-based distance
+				dist = c1.center.DistanceSquared(c2.center);
+			}
+			else
+			{
+				//calculate distance in Km
+				gps2 = c2.GetCenterGps(minCentersDistanceThreshold.proj);
+
+				dist = Projections::ProjectionUtils::Distance(gps1, gps2);
+			}
+
+			if ((dist != 0) && (dist < threshold))
+			{
+				//extremas are too close				
+				if (c1.type == PressureExtrema::PressureType::HIGH)
+				{
+					if (c1.centerValue < c2.centerValue)
+					{
+						c1.Clear();
+					}
+					else
+					{
+						c2.Clear();
+					}
+				}
+				else
+				{
+					if (c1.centerValue > c2.centerValue)
+					{
+						c1.Clear();
+					}
+					else
+					{
+						c2.Clear();
+					}
+				}
+			}
+
+			/*
+			if ((dist != 0) && (dist < threshold))
+			{
+				//extremas are too close
+				//remove the one with smalle area
+				if (c1.GetSizePixels() < c2.GetSizePixels())
+				{
+					c1.Clear();
+				}
+				else
+				{
+					c2.Clear();
+				}
+			}
+			*/
+		}
+	}
+
+}
+
+
+//===============================================================================
+// // Debug rendering methods
+//===============================================================================
 
 void CycloneDetector::RenderContours(const std::vector<Contour>& c) const
 {
@@ -1136,6 +1293,78 @@ void CycloneDetector::RenderContours()
 	output += "_extrema_location.png";
 	test.Save(output.c_str());
 }
+
+void CycloneDetector::RenderAreas(const Image2d<uint8_t>& areas)
+{
+	if (CycloneDetector::debugDirName == "")
+	{
+		return;
+	}
+
+	Image2d<uint8_t> test2 = ColorSpace::ConvertGrayToRgb(rawData.CreateAsMapped<uint8_t>(0, 255));
+	
+	uint8_t col[3] = { 255, 255, 255 };
+
+	for (auto& c : contours)
+	{
+		for (size_t i = 0; i < c.c.Size() - 1; i++)
+		{
+			auto p1 = c.c[i];
+			auto p2 = c.c[i + 1];
+
+#ifdef HAVE_OPENCV
+			test2.RunOpenCV([&](auto img, auto m) {
+				cv::line(m,
+					cv::Point(int(p1.x), int(p1.y)),
+					cv::Point(int(p2.x), int(p2.y)),
+					cv::Scalar(col[0], col[1], col[2]),
+					1);
+				});
+#else
+			ImageUtils::DrawLine(test2, col,
+				int(p1.x), int(p1.y),
+				int(p2.x), int(p2.y));
+#endif
+		}
+		}
+
+	col[0] = 255;
+	col[1] = 0;
+	col[2] = 0;
+
+	for (auto& c : extremas)
+	{
+		for (size_t i = 0; i < c.contour.c.Size() - 1; i++)
+		{
+			auto p1 = c.contour.c[i];
+			auto p2 = c.contour.c[i + 1];
+
+
+#ifdef HAVE_OPENCV
+			test2.RunOpenCV([&](auto img, auto m) {
+				cv::line(m,
+					cv::Point(int(p1.x), int(p1.y)),
+					cv::Point(int(p2.x), int(p2.y)),
+					cv::Scalar(col[0], col[1], col[2]),
+					2);
+				});
+#else
+			ImageUtils::DrawLine(test2, col,
+				int(p1.x), int(p1.y),
+				int(p2.x), int(p2.y));
+#endif
+		}
+
+		}
+
+	std::string output = debugDirName;
+	output += debugName;
+	output += "_candidate_areas.png";
+
+	test2.Save(output.c_str());
+
+}
+
 
 /// <summary>
 /// Get saver class instance
