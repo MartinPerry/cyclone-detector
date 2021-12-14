@@ -404,33 +404,16 @@ void CycloneDetector::BuildContoursHierarchy()
 				isChanged = true;
 				c.isExtrema = false; //current contour is not extrema (too small)
 
-				
-				double areaParent = 0;
-				if (this->smallAreaThreshold.unit == AreaThreshold::Unit::Km2)
+				//check if parent has any children extrema
+				//different than current contour c
+				bool hasOtherChildExtrema = false;
+				for (Contour* child : c.parent->childs)
 				{
-					areaParent = this->CalcArea(*c.parent, this->smallAreaThreshold.proj);
-				}
-				else
-				{
-					areaParent = c.parent->c.GetBoundingBox().GetArea(); //get parent area
-				}
-				
-
-				//area if parent is not "large"
-				//it can be up to 100x larger than child threshold
-				if (areaParent < areaThreshold * 100)
-				{
-					//check if parent has any children extrema
-					//different than current contour c
-					bool hasOtherChildExtrema = false;
-					for (Contour * child : c.parent->childs)
+					if ((child != &c) && (child->isExtrema))
 					{
-						if ((child != &c) && (child->isExtrema))
-						{
-							//there is another extrema
-							hasOtherChildExtrema = true;
-							break;
-						}
+						//there is another extrema
+						hasOtherChildExtrema = true;
+						break;
 					}
 
 					if (hasOtherChildExtrema == false)
